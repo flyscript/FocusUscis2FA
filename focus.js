@@ -8,8 +8,13 @@ var codeBox = document.getElementById("code");
 var hasGainedFocus = 0;
 var hasGainedFocusLimit = 1;
 
-// If this loads too quickly on a computer that is slow to reload the webpage, reattempts may be made
+// If this loads too quickly on a computer that is slow to reload
+//      the webpage, reattempts may be made
 var reattemptWait = 1000;
+
+// If no pop-up is present and the user clicks elsewhere, drawing
+//      focus away from the box, then do not automatically re-focus
+var escape = false;
 
 
 
@@ -19,7 +24,7 @@ function FocusOn2FaBox()
     // If the box exists then focus on it, otherwise fail
     if (codeBox != null)
     {
-        if (hasGainedFocus <= hasGainedFocusLimit)
+        if (hasGainedFocus <= hasGainedFocusLimit && !escape)
         {
             codeBox.focus();
             codeBox.addEventListener("blur", FocusOn2FaBox);
@@ -28,7 +33,7 @@ function FocusOn2FaBox()
         }
         else
         {
-            console.log("Already auto focused on code box too many times!");
+            console.log("Already auto focused on code box too many times! (or escape was true)");
         }
         
     }
@@ -51,5 +56,14 @@ function SetUpAndRun()
     FocusOn2FaBox();
 }
 
+// Sets flag to stop auto refocus (e.g: because of user input)
+function EscapeAutoFocus()
+{
+    escape = true;
+}
+
 // Trigger the trigger
 window.addEventListener('load', SetUpAndRun);
+
+// If the user draws focus, mark escape to stop auto refocus
+window.addEventListener('mousedown', EscapeAutoFocus, true);
