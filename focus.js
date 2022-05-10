@@ -1,22 +1,55 @@
 // William Chapman
 // 2022
 
-// USCIS will flash up a prompt to enter your 2FA code, which stupidly draws focus from the actual 2FA code box
-var millisecondDelay = 250;
+// Find the code box
+var codeBox = document.getElementById("code");
 
-function focusOn2faBox()
+// If the USCIS webpage draws focus from the box for a popup
+var hasGainedFocus = 0;
+var hasGainedFocusLimit = 1;
+
+// If this loads too quickly on a computer that is slow to reload the webpage, reattempts may be made
+var reattemptWait = 1000;
+
+
+
+// Main method for focusing on the box
+function FocusOn2FaBox()
 {
-    var codeBox = document.getElementById("code");
-
     // If the box exists then focus on it, otherwise fail
-    if (codeBox != null) {
-        codeBox.focus();
-        console.log("Auto focused on code box!");
-    } else {
+    if (codeBox != null)
+    {
+        if (hasGainedFocus <= hasGainedFocusLimit)
+        {
+            codeBox.focus();
+            codeBox.addEventListener("blur", FocusOn2FaBox);
+            console.log("Auto focused on code box!");
+            hasGainedFocus++;
+        }
+        else
+        {
+            console.log("Already auto focused on code box too many times!");
+        }
+        
+    }
+    else
+    {
         console.log("Could not find box to auto-focus!");
+        
+        // Reattempt to locate the box
+        setTimeout(SetUpAndRun, reattemptWait);
     }
 }
 
-// Cheap and cheerful, easily breakable on a super slow machine, but I didn't want
-//  to bother waiting for an element that might not exist if they change their site
-setTimeout(focusOn2faBox, millisecondDelay);
+
+// Initial trigger that may need to be re-run if webpage is slow to load
+function SetUpAndRun()
+{
+    // Find the code box
+    codeBox = document.getElementById("code");
+
+    FocusOn2FaBox();
+}
+
+// Trigger the trigger
+window.addEventListener('load', SetUpAndRun);
